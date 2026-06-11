@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "id": "b5a0cf09-e05d-4803-9920-5b95258a1084",
+    "username": "Parker",
+    "passwordHash": "$2b$12$ZypRdbuz7NFPbxqtcK5P5ewhlPCdIUfEUrYdXSBf73UlWLtYF8YoC"
+  },
+  {
+    "id": "1a4d0733-d419-471d-8cb4-eba178912b64",
+    "username": "guest",
+    "passwordHash": "$2b$12$5pkmBWAkGqRftYioZhb7OeuTH9LB5ZuXSpkauuXdJ6ZOi0KZRjAvu"
+  }
+]

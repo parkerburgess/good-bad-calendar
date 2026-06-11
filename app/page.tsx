@@ -5,6 +5,7 @@ import { getIronSession } from "iron-session";
 import CalendarGrid from "@/components/CalendarGrid";
 import WeekNavigation from "@/components/WeekNavigation";
 import LogoutButton from "@/components/LogoutButton";
+import CategoryLegend from "@/components/CategoryLegend";
 import { dal } from "@/lib/dal";
 import type { DayEntry } from "@/lib/dal";
 import { sessionOptions } from "@/lib/session";
@@ -51,7 +52,6 @@ export default async function Home({ searchParams }: Props) {
   const today = new Date(new Date().toDateString()); // strip time
   const fiveDaysAgo = addDays(today, -5);
 
-  // Base 2-week window (offset 0): weeks containing active days
   const weekOfToday = startOfSunday(today);
   const weekOfFiveDaysAgo = startOfSunday(fiveDaysAgo);
   const baseStart =
@@ -60,7 +60,6 @@ export default async function Home({ searchParams }: Props) {
       : weekOfFiveDaysAgo;
   const baseEnd = addDays(weekOfToday, 6);
 
-  // Shift by weekOffset
   const startSunday = addDays(baseStart, weekOffset * 7);
   const endSaturday = addDays(baseEnd, weekOffset * 7);
 
@@ -71,7 +70,6 @@ export default async function Home({ searchParams }: Props) {
     cursor = addDays(cursor, 1);
   }
 
-  // Active window is always anchored to real today, regardless of nav offset
   const activeDates = new Set<string>();
   for (let i = 0; i <= 5; i++) {
     activeDates.add(toIso(addDays(today, -i)));
@@ -89,11 +87,8 @@ export default async function Home({ searchParams }: Props) {
 
   return (
     <main className="min-h-screen bg-gray-50 p-4">
-      <div className="flex items-center mb-4">
+      <div className="flex items-center mb-1">
         <h1 className="text-xl font-bold text-gray-800">Good/Bad Calendar</h1>
-        {session.username && (
-          <span className="ml-3 text-sm text-gray-500">{session.username}</span>
-        )}
         <WeekNavigation
           weekOffset={weekOffset}
           startDate={formatNavDate(startSunday)}
@@ -101,7 +96,15 @@ export default async function Home({ searchParams }: Props) {
           canGoBack={canGoBack}
           canGoForward={canGoForward}
         />
-        <LogoutButton />
+        <div className="ml-auto flex items-center gap-3">
+          {session.username && (
+            <span className="text-sm text-gray-500">{session.username}</span>
+          )}
+          <LogoutButton />
+        </div>
+      </div>
+      <div className="flex justify-end mb-3">
+        <CategoryLegend categories={categories} />
       </div>
       <CalendarGrid
         dates={dates}

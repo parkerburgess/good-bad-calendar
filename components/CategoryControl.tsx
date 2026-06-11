@@ -1,10 +1,12 @@
 "use client";
 
+import type { Category } from "@/lib/dal";
+
 type Props = {
-  category: string;
+  category: Category;
   value: boolean | null;
   isActive: boolean;
-  onRecord: (category: string, value: boolean) => void;
+  onRecord: (categoryKey: string, value: boolean) => void;
 };
 
 export default function CategoryControl({ category, value, isActive, onRecord }: Props) {
@@ -21,17 +23,17 @@ export default function CategoryControl({ category, value, isActive, onRecord }:
       {isActive && !recorded ? (
         <>
           <button
-            onClick={() => onRecord(category, false)}
+            onClick={() => onRecord(category.displayText, false)}
             className="text-xs bg-gray-600 hover:bg-gray-700 rounded px-1.5 py-0.5 leading-none"
             aria-label="No"
           >
             ▼
           </button>
           <span className="flex-1 text-center text-xs font-medium text-gray-800">
-            {category}
+            {category.displayText}
           </span>
           <button
-            onClick={() => onRecord(category, true)}
+            onClick={() => onRecord(category.displayText, true)}
             className="text-xs bg-gray-600 hover:bg-gray-700 rounded px-1.5 py-0.5 leading-none"
             aria-label="Yes"
           >
@@ -40,7 +42,7 @@ export default function CategoryControl({ category, value, isActive, onRecord }:
         </>
       ) : (
         <span className="flex-1 text-center text-xs font-medium text-white">
-          {category}
+          {category.displayText}
         </span>
       )}
     </div>

@@ -1,0 +1,22 @@
+[
+  {
+    "displayText": "God",
+    "legendText": "Spiritual Time"
+  },
+  {
+    "displayText": "Diet",
+    "legendText": "Nutrition"
+  },
+  {
+    "displayText": "PA",
+    "legendText": "Physical Activity"
+  },
+  {
+    "displayText": "Code",
+    "legendText": "Software Developer Skills"
+  },
+  {
+    "displayText": "Social",
+    "legendText": "Socialization"
+  }
+]

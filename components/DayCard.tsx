@@ -1,11 +1,11 @@
 "use client";
 
 import CategoryControl from "@/components/CategoryControl";
-import type { DayEntry } from "@/lib/dal";
+import type { Category, DayEntry } from "@/lib/dal";
 
 type Props = {
   date: string;
-  categories: string[];
+  categories: Category[];
   entry: DayEntry | null;
   isActive: boolean;
   onRecord: (date: string, category: string, value: boolean) => void;
@@ -17,9 +17,9 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString("en-US", { weekday: "short", month: "numeric", day: "numeric" });
 }
 
-function cardTint(categories: string[], values: Record<string, boolean | null>): string {
-  const yesCount = categories.filter((c) => values[c] === true).length;
-  const noCount = categories.filter((c) => values[c] === false).length;
+function cardTint(categories: Category[], values: Record<string, boolean | null>): string {
+  const yesCount = categories.filter((c) => values[c.displayText] === true).length;
+  const noCount = categories.filter((c) => values[c.displayText] === false).length;
   if (yesCount + noCount === 0) return "";
   return yesCount >= noCount ? "bg-green-400/30" : "bg-red-400/30";
 }
@@ -39,11 +39,11 @@ export default function DayCard({ date, categories, entry, isActive, onRecord }:
       </div>
       {categories.map((cat) => (
         <CategoryControl
-          key={cat}
+          key={cat.displayText}
           category={cat}
-          value={values[cat] ?? null}
+          value={values[cat.displayText] ?? null}
           isActive={isActive}
-          onRecord={(c, v) => onRecord(date, c, v)}
+          onRecord={(key, v) => onRecord(date, key, v)}
         />
       ))}
     </div>

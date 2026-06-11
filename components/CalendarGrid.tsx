@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import DayCard from "@/components/DayCard";
-import type { DayEntry } from "@/lib/dal";
+import type { Category, DayEntry } from "@/lib/dal";
 
 type Props = {
-  dates: string[]; // all dates in order, oldest first, Sunday-aligned
-  categories: string[];
+  dates: string[];
+  categories: Category[];
   initialEntries: Record<string, DayEntry | null>;
   activeDates: Set<string>;
 };
@@ -26,7 +26,6 @@ export default function CalendarGrid({ dates, categories, initialEntries, active
     const updatedValues = { ...(existing?.values ?? {}), [category]: value };
     const updatedEntry: DayEntry = { date, values: updatedValues };
 
-    // Optimistic update
     setEntries((prev) => ({ ...prev, [date]: updatedEntry }));
 
     await fetch("/api/record", {
@@ -36,7 +35,6 @@ export default function CalendarGrid({ dates, categories, initialEntries, active
     });
   }
 
-  // Split dates into rows of 7 (each row is one week, starting Sunday)
   const weeks: string[][] = [];
   for (let i = 0; i < dates.length; i += 7) {
     weeks.push(dates.slice(i, i + 7));
@@ -46,11 +44,9 @@ export default function CalendarGrid({ dates, categories, initialEntries, active
     <div className="overflow-x-auto w-full">
       {weeks.map((week, wi) => (
         <div key={wi} className="flex items-stretch gap-1 mb-2 w-full">
-          {/* Week label */}
           <div className="w-12 shrink-0 flex items-center justify-end text-xs text-gray-400 font-medium pr-1">
             {getSundayLabel(week)}
           </div>
-          {/* 7 day cards — flex-1 min-w-[128px] set on DayCard */}
           {week.map((date) => (
             <DayCard
               key={date}
