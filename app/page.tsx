@@ -1,65 +1,114 @@
-import Image from "next/image";
+export const dynamic = "force-dynamic";
 
-export default function Home() {
+import { cookies } from "next/headers";
+import { getIronSession } from "iron-session";
+import CalendarGrid from "@/components/CalendarGrid";
+import WeekNavigation from "@/components/WeekNavigation";
+import LogoutButton from "@/components/LogoutButton";
+import { dal } from "@/lib/dal";
+import type { DayEntry } from "@/lib/dal";
+import { sessionOptions } from "@/lib/session";
+import type { SessionData } from "@/lib/session";
+
+function toIso(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+
+function addDays(d: Date, n: number): Date {
+  const result = new Date(d);
+  result.setDate(result.getDate() + n);
+  return result;
+}
+
+function startOfSunday(d: Date): Date {
+  return addDays(d, -d.getDay());
+}
+
+function formatNavDate(d: Date): string {
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+async function weekHasData(userId: string, sunday: Date): Promise<boolean> {
+  const checks = await Promise.all(
+    Array.from({ length: 7 }, (_, i) => dal.getDayEntry(userId, toIso(addDays(sunday, i))))
+  );
+  return checks.some((e) => e !== null);
+}
+
+type Props = {
+  searchParams: Promise<{ weekOffset?: string }>;
+};
+
+export default async function Home({ searchParams }: Props) {
+  const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
+  const userId = session.userId ?? "default";
+
+  const params = await searchParams;
+  const weekOffset = Math.min(0, parseInt(params.weekOffset ?? "0", 10));
+
+  const categories = await dal.getCategories(userId);
+
+  const today = new Date(new Date().toDateString()); // strip time
+  const fiveDaysAgo = addDays(today, -5);
+
+  // Base 2-week window (offset 0): weeks containing active days
+  const weekOfToday = startOfSunday(today);
+  const weekOfFiveDaysAgo = startOfSunday(fiveDaysAgo);
+  const baseStart =
+    toIso(weekOfToday) === toIso(weekOfFiveDaysAgo)
+      ? addDays(weekOfToday, -7)
+      : weekOfFiveDaysAgo;
+  const baseEnd = addDays(weekOfToday, 6);
+
+  // Shift by weekOffset
+  const startSunday = addDays(baseStart, weekOffset * 7);
+  const endSaturday = addDays(baseEnd, weekOffset * 7);
+
+  const dates: string[] = [];
+  let cursor = new Date(startSunday);
+  while (cursor <= endSaturday) {
+    dates.push(toIso(cursor));
+    cursor = addDays(cursor, 1);
+  }
+
+  // Active window is always anchored to real today, regardless of nav offset
+  const activeDates = new Set<string>();
+  for (let i = 0; i <= 5; i++) {
+    activeDates.add(toIso(addDays(today, -i)));
+  }
+
+  const [entryResults, canGoBack, canGoForward] = await Promise.all([
+    Promise.all(dates.map((d) => dal.getDayEntry(userId, d))),
+    weekHasData(userId, addDays(startSunday, -7)),
+    weekHasData(userId, addDays(endSaturday, 1)),
+  ]);
+  const initialEntries: Record<string, DayEntry | null> = {};
+  dates.forEach((d, i) => {
+    initialEntries[d] = entryResults[i];
+  });
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main className="min-h-screen bg-gray-50 p-4">
+      <div className="flex items-center mb-4">
+        <h1 className="text-xl font-bold text-gray-800">Good/Bad Calendar</h1>
+        {session.username && (
+          <span className="ml-3 text-sm text-gray-500">{session.username}</span>
+        )}
+        <WeekNavigation
+          weekOffset={weekOffset}
+          startDate={formatNavDate(startSunday)}
+          endDate={formatNavDate(endSaturday)}
+          canGoBack={canGoBack}
+          canGoForward={canGoForward}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+        <LogoutButton />
+      </div>
+      <CalendarGrid
+        dates={dates}
+        categories={categories}
+        initialEntries={initialEntries}
+        activeDates={activeDates}
+      />
+    </main>
   );
 }

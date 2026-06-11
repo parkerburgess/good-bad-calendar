@@ -1,0 +1,10 @@
+{
+  "date": "2026-06-06",
+  "values": {
+    "God": false,
+    "Diet": true,
+    "Exercise": false,
+    "Social": true,
+    "Drinking": true
+  }
+}
