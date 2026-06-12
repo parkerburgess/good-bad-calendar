@@ -1,9 +1,5 @@
-import fs from "fs/promises";
-import path from "path";
 import bcrypt from "bcryptjs";
-import { DATA_DIR } from "@/lib/config";
-
-const USERS_FILE = path.join(DATA_DIR, "users.json");
+import { getPool } from "@/lib/db";
 
 type UserRecord = {
   id: string;
@@ -11,42 +7,55 @@ type UserRecord = {
   passwordHash: string;
 };
 
-async function readUsers(): Promise<UserRecord[]> {
-  try {
-    const raw = await fs.readFile(USERS_FILE, "utf-8");
-    return JSON.parse(raw) as UserRecord[];
-  } catch {
-    return [];
-  }
-}
-
-async function writeUsers(users: UserRecord[]): Promise<void> {
-  await fs.writeFile(USERS_FILE, JSON.stringify(users, null, 2), "utf-8");
-}
-
 export async function verifyUser(
   username: string,
   password: string
 ): Promise<Pick<UserRecord, "id" | "username"> | null> {
-  const users = await readUsers();
-  const user = users.find((u) => u.username.toLowerCase() === username.toLowerCase());
-  if (!user) return null;
-  const match = await bcrypt.compare(password, user.passwordHash);
-  return match ? { id: user.id, username: user.username } : null;
+  const pool = await getPool();
+  const result = await pool
+    .request()
+    .input("username", username)
+    .query(`
+      SELECT Id, Username, PasswordHash
+      FROM goodbad.User
+      WHERE Username = @username
+    `);
+
+  if (result.recordset.length === 0) return null;
+  const user = result.recordset[0];
+  const match = await bcrypt.compare(password, user.PasswordHash as string);
+  return match
+    ? { id: user.Id as string, username: user.Username as string }
+    : null;
 }
 
-export async function createUser(username: string, password: string): Promise<UserRecord> {
-  const users = await readUsers();
-  if (users.some((u) => u.username.toLowerCase() === username.toLowerCase())) {
+export async function createUser(
+  username: string,
+  password: string
+): Promise<UserRecord> {
+  const pool = await getPool();
+
+  const existing = await pool
+    .request()
+    .input("username", username)
+    .query(`SELECT Id FROM goodbad.User WHERE Username = @username`);
+
+  if (existing.recordset.length > 0) {
     throw new Error("Username already taken");
   }
+
   const passwordHash = await bcrypt.hash(password, 12);
-  const newUser: UserRecord = {
-    id: crypto.randomUUID(),
-    username,
-    passwordHash,
-  };
-  users.push(newUser);
-  await writeUsers(users);
-  return newUser;
+  const id = crypto.randomUUID();
+
+  await pool
+    .request()
+    .input("id", id)
+    .input("username", username)
+    .input("passwordHash", passwordHash)
+    .query(`
+      INSERT INTO goodbad.User (Id, Username, PasswordHash)
+      VALUES (@id, @username, @passwordHash)
+    `);
+
+  return { id, username, passwordHash };
 }
