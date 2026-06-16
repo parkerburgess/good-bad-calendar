@@ -1,15 +1,12 @@
 export const dynamic = "force-dynamic";
 
-import { cookies } from "next/headers";
-import { getIronSession } from "iron-session";
 import CalendarGrid from "@/components/CalendarGrid";
 import WeekNavigation from "@/components/WeekNavigation";
 import LogoutButton from "@/components/LogoutButton";
 import CategoryLegend from "@/components/CategoryLegend";
 import { dal } from "@/lib/dal";
 import type { DayEntry } from "@/lib/dal";
-import { sessionOptions } from "@/lib/session";
-import type { SessionData } from "@/lib/session";
+import { getUserId } from "@/lib/auth";
 
 function toIso(d: Date): string {
   return d.toISOString().slice(0, 10);
@@ -41,8 +38,7 @@ type Props = {
 };
 
 export default async function Home({ searchParams }: Props) {
-  const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
-  const userId = session.userId ?? "default";
+  const userId = await getUserId();
 
   const params = await searchParams;
   const weekOffset = Math.min(0, parseInt(params.weekOffset ?? "0", 10));
@@ -97,10 +93,7 @@ export default async function Home({ searchParams }: Props) {
           canGoForward={canGoForward}
         />
         <div className="ml-auto flex items-center gap-3">
-          {session.username && (
-            <span className="text-sm text-gray-500">{session.username}</span>
-          )}
-          <LogoutButton />
+            <LogoutButton />
         </div>
       </div>
       <div className="flex justify-end mb-3">

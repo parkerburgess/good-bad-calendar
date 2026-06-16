@@ -1,17 +1,9 @@
-import { cookies } from "next/headers";
-import { getIronSession } from "iron-session";
 import { NextResponse } from "next/server";
 import { dal } from "@/lib/dal";
-import { sessionOptions } from "@/lib/session";
-import type { SessionData } from "@/lib/session";
+import { getUserId } from "@/lib/auth";
 
 export async function POST(request: Request) {
-  const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
-  if (!session.isAuthenticated) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const userId = session.userId ?? "default";
+  const userId = await getUserId();
   const body = await request.json() as { date: string; category: string; value: boolean };
   const { date, category, value } = body;
 
