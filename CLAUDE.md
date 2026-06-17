@@ -2,7 +2,7 @@
 
 ## Project Overview
 A simple Next.js web app for daily habit tracking. Users toggle categories as "yes" or "no"
-each day. History is displayed in a scrollable calendar grid. Keep it simple — no over-engineering.
+each day. History is displayed in a scrollable calendar grid. 
 
 ## Tech Stack
 - **Framework**: Next.js (App Router)
