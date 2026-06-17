@@ -1,6 +1,10 @@
 import { getPool } from "@/lib/db";
 import type { Category, DayEntry, IDataAccess } from "@/lib/dal/types";
 
+type CategoryRow = { DisplayText: string; LegendText: string };
+type DayIdRow    = { Id: number };
+type DayValueRow = { DisplayText: string; Value: boolean | null };
+
 export const sqlDataAccess: IDataAccess = {
   async getCategories(userId: string): Promise<Category[]> {
     try {
@@ -8,15 +12,15 @@ export const sqlDataAccess: IDataAccess = {
       const result = await pool
         .request()
         .input("userId", userId)
-        .query(`
+        .query<CategoryRow>(`
           SELECT DisplayText, LegendText
           FROM goodbad.Category
           WHERE UserId = @userId
           ORDER BY SortOrder
         `);
       return result.recordset.map((row) => ({
-        displayText: row.DisplayText as string,
-        legendText: row.LegendText as string,
+        displayText: row.DisplayText,
+        legendText: row.LegendText,
       }));
     } catch (err) {
       console.error("[DAL] getCategories failed", { userId, err });
@@ -32,19 +36,19 @@ export const sqlDataAccess: IDataAccess = {
         .request()
         .input("userId", userId)
         .input("date", date)
-        .query(`
+        .query<DayIdRow>(`
           SELECT Id FROM goodbad.Day
           WHERE UserId = @userId AND Date = @date
         `);
 
       if (dayResult.recordset.length === 0) return null;
 
-      const dayId = dayResult.recordset[0].Id as number;
+      const dayId = dayResult.recordset[0].Id;
 
       const valuesResult = await pool
         .request()
         .input("dayId", dayId)
-        .query(`
+        .query<DayValueRow>(`
           SELECT c.DisplayText, d_v.Value
           FROM goodbad.Day_Category d_v
           JOIN goodbad.Category c ON c.Id = d_v.CategoryId
@@ -53,8 +57,7 @@ export const sqlDataAccess: IDataAccess = {
 
       const values: Record<string, boolean | null> = {};
       for (const row of valuesResult.recordset) {
-        const v = row.Value as boolean | null;
-        values[row.DisplayText as string] = v === null ? null : Boolean(v);
+        values[row.DisplayText] = row.Value === null ? null : Boolean(row.Value);
       }
 
       return { date, values };
@@ -68,20 +71,18 @@ export const sqlDataAccess: IDataAccess = {
     try {
       const pool = await getPool();
 
-      // Ensure the day row exists, then fetch its Id
       const dayResult = await pool
         .request()
         .input("userId", userId)
         .input("date", entry.date)
-        .query(`
+        .query<DayIdRow>(`
           IF NOT EXISTS (SELECT 1 FROM goodbad.Day WHERE UserId = @userId AND Date = @date)
             INSERT INTO goodbad.Day (UserId, Date) VALUES (@userId, @date);
           SELECT Id FROM goodbad.Day WHERE UserId = @userId AND Date = @date;
         `);
 
-      const dayId = dayResult.recordset[0].Id as number;
+      const dayId = dayResult.recordset[0].Id;
 
-      // Upsert each category value
       for (const [categoryName, value] of Object.entries(entry.values)) {
         await pool
           .request()
