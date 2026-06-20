@@ -15,6 +15,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL(WANDERING_PARKER_URL))
   }
 
+  /*
   try {
     await jwtVerify(token, JWKS)
     return NextResponse.next()
@@ -23,6 +24,7 @@ export async function proxy(request: NextRequest) {
     response.cookies.delete('auth_token')
     return response
   }
+    */
 }
 
 export const config = {
