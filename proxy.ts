@@ -11,15 +11,19 @@ const JWKS = createRemoteJWKSet(
 export async function proxy(request: NextRequest) {
   const token = request.cookies.get('auth_token')?.value
 
+  const returnUrl = `${request.nextUrl.protocol}//${request.nextUrl.host}`
+  const loginUrl = new URL('/login', WANDERING_PARKER_URL)
+  loginUrl.searchParams.set('return_url', returnUrl)
+
   if (!token) {
-    return NextResponse.redirect(new URL(WANDERING_PARKER_URL))
+    return NextResponse.redirect(loginUrl)
   }
 
   try {
     await jwtVerify(token, JWKS)
     return NextResponse.next()
   } catch {
-    const response = NextResponse.redirect(new URL(WANDERING_PARKER_URL))
+    const response = NextResponse.redirect(loginUrl)
     response.cookies.delete('auth_token')
     return response
   }
