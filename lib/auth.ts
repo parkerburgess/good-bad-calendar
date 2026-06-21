@@ -1,8 +1,16 @@
 import { decodeJwt } from 'jose'
 import { cookies } from 'next/headers'
 
-export async function getUserId(): Promise<string> {
+async function getPayload() {
   const token = (await cookies()).get('auth_token')!.value
-  const payload = decodeJwt(token)
-  return payload.sub!
+  return decodeJwt(token)
+}
+
+export async function getUserId(): Promise<string> {
+  return (await getPayload()).sub!
+}
+
+export async function getUserName(): Promise<string> {
+  const payload = await getPayload()
+  return (payload.name as string | undefined) ?? (payload.email as string | undefined) ?? ''
 }

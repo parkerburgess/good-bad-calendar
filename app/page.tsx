@@ -6,7 +6,7 @@ import LogoutButton from "@/components/LogoutButton";
 import CategoryLegend from "@/components/CategoryLegend";
 import { dal } from "@/lib/dal";
 import type { DayEntry } from "@/lib/dal";
-import { getUserId } from "@/lib/auth";
+import { getUserId, getUserName } from "@/lib/auth";
 
 function toIso(d: Date): string {
   return d.toISOString().slice(0, 10);
@@ -38,7 +38,7 @@ type Props = {
 };
 
 export default async function Home({ searchParams }: Props) {
-  const userId = await getUserId();
+  const [userId, userName] = await Promise.all([getUserId(), getUserName()]);
 
   const params = await searchParams;
   const weekOffset = Math.min(0, parseInt(params.weekOffset ?? "0", 10));
@@ -93,6 +93,7 @@ export default async function Home({ searchParams }: Props) {
           canGoForward={canGoForward}
         />
         <div className="ml-auto flex items-center gap-3">
+            {userName && <span className="text-xs text-gray-500">{userName}</span>}
             <LogoutButton />
         </div>
       </div>
