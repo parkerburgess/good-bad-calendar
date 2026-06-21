@@ -2,7 +2,7 @@ import { getPool } from "@/lib/db";
 import type { Category, DayEntry, IDataAccess } from "@/lib/dal/types";
 
 type CategoryRow = { DisplayText: string; LegendText: string };
-type DayIdRow    = { Id: number };
+type DayIdRow    = { DayId: number };
 type DayValueRow = { DisplayText: string; Value: boolean | null };
 
 export const sqlDataAccess: IDataAccess = {
@@ -37,13 +37,13 @@ export const sqlDataAccess: IDataAccess = {
         .input("userId", userId)
         .input("date", date)
         .query<DayIdRow>(`
-          SELECT Id FROM goodbad.Day
+          SELECT DayId FROM goodbad.Day
           WHERE UserId = @userId AND Date = @date
         `);
 
       if (dayResult.recordset.length === 0) return null;
 
-      const dayId = dayResult.recordset[0].Id;
+      const dayId = dayResult.recordset[0].DayId;
 
       const valuesResult = await pool
         .request()
@@ -51,7 +51,7 @@ export const sqlDataAccess: IDataAccess = {
         .query<DayValueRow>(`
           SELECT c.DisplayText, d_v.Value
           FROM goodbad.Day_Category d_v
-          JOIN goodbad.Category c ON c.Id = d_v.CategoryId
+          JOIN goodbad.Category c ON c.CategoryId = d_v.CategoryId
           WHERE d_v.DayId = @dayId
         `);
 
@@ -78,10 +78,10 @@ export const sqlDataAccess: IDataAccess = {
         .query<DayIdRow>(`
           IF NOT EXISTS (SELECT 1 FROM goodbad.Day WHERE UserId = @userId AND Date = @date)
             INSERT INTO goodbad.Day (UserId, Date) VALUES (@userId, @date);
-          SELECT Id FROM goodbad.Day WHERE UserId = @userId AND Date = @date;
+          SELECT DayId FROM goodbad.Day WHERE UserId = @userId AND Date = @date;
         `);
 
-      const dayId = dayResult.recordset[0].Id;
+      const dayId = dayResult.recordset[0].DayId;
 
       for (const [categoryName, value] of Object.entries(entry.values)) {
         await pool
@@ -93,7 +93,7 @@ export const sqlDataAccess: IDataAccess = {
           .query(`
             MERGE goodbad.Day_Category AS target
             USING (
-              SELECT c.Id AS CategoryId
+              SELECT c.CategoryId
               FROM goodbad.Category c
               WHERE c.UserId = @userId AND c.DisplayText = @categoryName
             ) AS source ON target.DayId = @dayId AND target.CategoryId = source.CategoryId
