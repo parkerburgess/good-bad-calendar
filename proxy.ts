@@ -9,6 +9,10 @@ const JWKS = createRemoteJWKSet(
 )
 
 export async function proxy(request: NextRequest) {
+  if (process.env.DISABLE_AUTH === 'true' && process.env.NODE_ENV !== 'production') {
+    return NextResponse.next()
+  }
+
   const token = request.cookies.get('auth_token')?.value
 
   const returnUrl = `${request.nextUrl.protocol}//${request.nextUrl.host}`
