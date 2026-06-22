@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import CalendarGrid from "@/components/CalendarGrid";
 import WeekNavigation from "@/components/WeekNavigation";
-import LogoutButton from "@/components/LogoutButton";
+import UserMenu from "@/components/UserMenu";
 import CategoryLegend from "@/components/CategoryLegend";
 import { dal } from "@/lib/dal";
 import type { DayEntry } from "@/lib/dal";
@@ -93,8 +93,7 @@ export default async function Home({ searchParams }: Props) {
           canGoForward={canGoForward}
         />
         <div className="ml-auto flex items-center gap-3">
-            {userName && <span className="text-xs text-gray-500">{userName}</span>}
-            <LogoutButton />
+            <UserMenu userName={userName} />
         </div>
       </div>
       <div className="flex justify-end mb-3">

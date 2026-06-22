@@ -18,8 +18,12 @@ export async function getUserId(): Promise<string> {
   return (await getPayload()).sub!
 }
 
-export async function getUserName(): Promise<string> {
+export async function getUserName(): Promise<string | null> {
   if (isAuthDisabled()) return DEV_USER_NAME
-  const payload = await getPayload()
-  return (payload.name as string | undefined) ?? (payload.email as string | undefined) ?? ''
+  try {
+    const payload = await getPayload()
+    return (payload.name as string | undefined) ?? (payload.email as string | undefined) ?? null
+  } catch {
+    return null
+  }
 }
