@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3002",
+    "dev": "concurrently \"next dev -p 3002\" \"wait-on http://localhost:3002 && start chrome --incognito http://localhost:3002\"",
     "dev:all": "concurrently --kill-others --names \"auth,wp,gbc\" --prefix-colors \"yellow,cyan,green\" \"npm run --prefix ../auth-wandering-parker dev\" \"npm run --prefix ../wandering-parker dev\" \"npm run dev\"",
     "build": "next build",
     "start": "next start",
@@ -28,6 +28,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wait-on": "^9.0.10"
   }
 }
