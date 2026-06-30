@@ -8,7 +8,7 @@ each day. History is displayed in a scrollable calendar grid.
 - **Framework**: Next.js (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
-- **Data Storage**: JSON files via an abstracted DAL (swappable for a relational DB later)
+- **Data Storage**: mssql to a sql server
 
 ## Architecture
 

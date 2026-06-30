@@ -14,7 +14,11 @@ type Props = {
 function formatDate(dateStr: string): string {
   const [year, month, day] = dateStr.split("-").map(Number);
   const d = new Date(year, month - 1, day);
-  return d.toLocaleDateString("en-US", { weekday: "short", month: "numeric", day: "numeric" });
+  return d.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "numeric",
+    day: "numeric",
+  });
 }
 
 function cardTint(categories: Category[], values: Record<string, boolean | null>): string {
@@ -28,13 +32,14 @@ export default function DayCard({ date, categories, entry, isActive, onRecord }:
   const values = entry?.values ?? {};
   const tint = cardTint(categories, values);
 
+  // #region Tailwind utility consts
+  const cardCls = `border border-gray-200 rounded-lg p-2 flex flex-col gap-1 flex-1 min-w-[128px] transition-opacity ${tint} ${isActive ? "opacity-100" : "opacity-40"}`;
+  const dateHeaderCls = "text-center text-xs font-bold text-gray-700 mb-1";
+  // #endregion
+
   return (
-    <div
-      className={`border border-gray-200 rounded-lg p-2 flex flex-col gap-1 flex-1 min-w-[128px] transition-opacity ${tint} ${
-        isActive ? "opacity-100" : "opacity-40"
-      }`}
-    >
-      <div className="text-center text-xs font-bold text-gray-700 mb-1">
+    <div className={cardCls}>
+      <div className={dateHeaderCls}>
         {formatDate(date)}
       </div>
       {categories.map((cat) => (

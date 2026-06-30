@@ -81,10 +81,18 @@ export default async function Home({ searchParams }: Props) {
     initialEntries[d] = entryResults[i];
   });
 
+  // #region Tailwind utility consts
+  const pageCls = "min-h-screen bg-gray-50 p-4";
+  const headerCls = "flex items-center mb-1";
+  const titleCls = "text-xl font-bold text-gray-800";
+  const userMenuWrapperCls = "ml-auto flex items-center gap-3";
+  const legendRowCls = "flex justify-end mb-3";
+  // #endregion
+
   return (
-    <main className="min-h-screen bg-gray-50 p-4">
-      <div className="flex items-center mb-1">
-        <h1 className="text-xl font-bold text-gray-800">Good/Bad Calendar</h1>
+    <main className={pageCls}>
+      <div className={headerCls}>
+        <h1 className={titleCls}>Good/Bad Calendar</h1>
         <WeekNavigation
           weekOffset={weekOffset}
           startDate={formatNavDate(startSunday)}
@@ -92,11 +100,11 @@ export default async function Home({ searchParams }: Props) {
           canGoBack={canGoBack}
           canGoForward={canGoForward}
         />
-        <div className="ml-auto flex items-center gap-3">
-            <UserMenu userName={userName} />
+        <div className={userMenuWrapperCls}>
+          <UserMenu userName={userName} />
         </div>
       </div>
-      <div className="flex justify-end mb-3">
+      <div className={legendRowCls}>
         <CategoryLegend categories={categories} />
       </div>
       <CalendarGrid

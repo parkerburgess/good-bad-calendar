@@ -22,12 +22,14 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // #region Tailwind utility consts
+  const htmlCls = `${geistSans.variable} ${geistMono.variable} h-full antialiased`;
+  const bodyCls = "min-h-full flex flex-col";
+  // #endregion
+
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="en" className={htmlCls}>
+      <body className={bodyCls}>{children}</body>
     </html>
   );
 }
