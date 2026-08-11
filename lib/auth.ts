@@ -1,7 +1,7 @@
 import { decodeJwt } from 'jose'
 import { cookies } from 'next/headers'
 
-const DEV_USER_ID = 1
+const DEV_USER_ID = 'dev-user-1'
 const DEV_USER_NAME = 'Dev User (Parker)'
 
 function isAuthDisabled() {
