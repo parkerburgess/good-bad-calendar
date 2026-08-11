@@ -2,11 +2,11 @@ export const dynamic = "force-dynamic";
 
 import CalendarGrid from "@/components/CalendarGrid";
 import WeekNavigation from "@/components/WeekNavigation";
-import UserMenu from "@/components/UserMenu";
 import CategoryLegend from "@/components/CategoryLegend";
 import { dal } from "@/lib/dal";
 import type { DayEntry } from "@/lib/dal";
 import { getUserId, getUserName } from "@parkerburgess/wandering-parker-server";
+import { UserMenu } from "@parkerburgess/wandering-parker-ui";
 
 function toIso(d: Date): string {
   return d.toISOString().slice(0, 10);
@@ -101,7 +101,7 @@ export default async function Home({ searchParams }: Props) {
           canGoForward={canGoForward}
         />
         <div className={userMenuWrapperCls}>
-          <UserMenu userName={userName} />
+          {userName && <UserMenu userName={userName} />}
         </div>
       </div>
       <div className={legendRowCls}>
