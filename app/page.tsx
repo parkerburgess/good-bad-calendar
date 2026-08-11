@@ -6,7 +6,7 @@ import UserMenu from "@/components/UserMenu";
 import CategoryLegend from "@/components/CategoryLegend";
 import { dal } from "@/lib/dal";
 import type { DayEntry } from "@/lib/dal";
-import { getUserId, getUserName } from "@/lib/auth";
+import { getUserId, getUserName } from "@parkerburgess/wandering-parker-server";
 
 function toIso(d: Date): string {
   return d.toISOString().slice(0, 10);

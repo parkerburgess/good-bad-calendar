@@ -1,4 +1,4 @@
-import { getPool } from "@/lib/db";
+import { getPool } from "@parkerburgess/wandering-parker-server";
 import type { Category, DayEntry, IDataAccess } from "@/lib/dal/types";
 
 type CategoryRow = { DisplayText: string; LegendText: string };
