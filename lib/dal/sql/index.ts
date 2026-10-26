@@ -1,3 +1,4 @@
+import sql from "mssql";
 import { getPool } from "@parkerburgess/wandering-parker-server";
 import type { Category, DayEntry, IDataAccess } from "@/lib/dal/types";
 
@@ -11,7 +12,7 @@ export const sqlDataAccess: IDataAccess = {
       const pool = await getPool();
       const result = await pool
         .request()
-        .input("userId", userId)
+        .input("userId", sql.NVarChar(50), userId)
         .query<CategoryRow>(`
           SELECT DisplayText, LegendText
           FROM goodbad.Category
@@ -34,8 +35,8 @@ export const sqlDataAccess: IDataAccess = {
 
       const dayResult = await pool
         .request()
-        .input("userId", userId)
-        .input("date", date)
+        .input("userId", sql.NVarChar(50), userId)
+        .input("date", sql.Date, date)
         .query<DayIdRow>(`
           SELECT DayId FROM goodbad.Day
           WHERE UserId = @userId AND Date = @date
@@ -47,7 +48,7 @@ export const sqlDataAccess: IDataAccess = {
 
       const valuesResult = await pool
         .request()
-        .input("dayId", dayId)
+        .input("dayId", sql.Int, dayId)
         .query<DayValueRow>(`
           SELECT c.DisplayText, d_v.Value
           FROM goodbad.Day_Category d_v
@@ -73,8 +74,8 @@ export const sqlDataAccess: IDataAccess = {
 
       const dayResult = await pool
         .request()
-        .input("userId", userId)
-        .input("date", entry.date)
+        .input("userId", sql.NVarChar(50), userId)
+        .input("date", sql.Date, entry.date)
         .query<DayIdRow>(`
           IF NOT EXISTS (SELECT 1 FROM goodbad.Day WHERE UserId = @userId AND Date = @date)
             INSERT INTO goodbad.Day (UserId, Date) VALUES (@userId, @date);
@@ -86,10 +87,10 @@ export const sqlDataAccess: IDataAccess = {
       for (const [categoryName, value] of Object.entries(entry.values)) {
         await pool
           .request()
-          .input("dayId", dayId)
-          .input("userId", userId)
-          .input("categoryName", categoryName)
-          .input("value", value)
+          .input("dayId", sql.Int, dayId)
+          .input("userId", sql.NVarChar(50), userId)
+          .input("categoryName", sql.NVarChar(100), categoryName)
+          .input("value", sql.Bit, value)
           .query(`
             MERGE goodbad.Day_Category AS target
             USING (
