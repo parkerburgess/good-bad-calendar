@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@parkerburgess/wandering-parker-ui";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,8 +29,10 @@ export default function RootLayout({
   // #endregion
 
   return (
-    <html lang="en" className={htmlCls}>
-      <body className={bodyCls}>{children}</body>
+    <html lang="en" suppressHydrationWarning className={htmlCls}>
+      <body className={bodyCls}>
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
     </html>
   );
 }

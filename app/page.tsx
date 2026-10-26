@@ -6,7 +6,7 @@ import CategoryLegend from "@/components/CategoryLegend";
 import { dal } from "@/lib/dal";
 import type { DayEntry } from "@/lib/dal";
 import { getUserId, getUserName } from "@parkerburgess/wandering-parker-server";
-import { UserMenu } from "@parkerburgess/wandering-parker-ui";
+import HeaderUserMenu from "@/components/HeaderUserMenu";
 
 function toIso(d: Date): string {
   return d.toISOString().slice(0, 10);
@@ -101,7 +101,7 @@ export default async function Home({ searchParams }: Props) {
           canGoForward={canGoForward}
         />
         <div className={userMenuWrapperCls}>
-          {userName && <UserMenu userName={userName} />}
+          {userName && <HeaderUserMenu userName={userName} />}
         </div>
       </div>
       <div className={legendRowCls}>
